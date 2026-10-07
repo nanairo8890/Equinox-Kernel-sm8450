@@ -12,19 +12,35 @@
 
 ---
 
+> [!NOTE]
+> **This fork is the BakaSU edition of Equinox**, made by **Nanairo** with LF52406's permission.
+> It is Equinox 5.10.269 as released, with three changes:
+>
+> - **[BakaSU](https://github.com/Baka-SU/BakaSU)** (formerly ReSukiSU) instead of KernelSU-Next, as the `KernelSU/` submodule. Use the BakaSU manager 35217 or newer: this kernel uses UAPI 5, and older ReSukiSU managers (UAPI 4) ask to be updated before modules and `su` start.
+> - **SUSFS v2.3.0** from [simonpunk's](https://gitlab.com/simonpunk/susfs4ksu) `gki-android12-5.10` branch, through BakaSU's built-in SUSFS support.
+> - **BBR** as the default TCP congestion control.
+>
+> Everything else, DroidSpaces included, is LF52406's work, described below. The official Equinox
+> builds are at [LF52406/Equinox-Kernel-sm8450](https://github.com/LF52406/Equinox-Kernel-sm8450).
+> Report problems with the BakaSU edition here, not to LF52406.
+>
+> Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-bakasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-bakasu-r1.md)
+
+---
+
 ## Current Build
 
-|  | Component | Current |
-|:--:|:--|:--|
-| 🐧 | **Linux** | `5.10.269-Equinox` |
-| 🤖 | **Compatibility** | Android 16–17 · AOSP-based ROMs |
-| ⚡ | **KernelSU-Next** | `3.4.0` |
-| 🛡️ | **SUSFS** | `2.3.0` |
-| 📦 | **DroidSpaces** | Supported |
-| 🌐 | **TCP** | BBR available · CUBIC default |
-| 🛠️ | **Toolchain** | Neutron Clang `24.0.0git` |
-| ⚙️ | **Build** | Full LTO · Clang CFI · MODVERSIONS |
-| 🔒 | **KMI** | Verified |
+| Component | Current |
+|:--|:--|
+| **Linux** | `5.10.269-Equinox` |
+| **Compatibility** | Android 16–17 · AOSP-based ROMs |
+| **BakaSU** | `v4.2.0-rc3-c9246641` (35217) |
+| **SUSFS** | `2.3.0` |
+| **DroidSpaces** | Supported |
+| **TCP** | BBR default · CUBIC available |
+| **Toolchain** | AOSP Clang `22.0.0` (r584948) |
+| **Build** | ThinLTO · Clang CFI · MODVERSIONS |
+| **KMI** | Verified against clean Equinox 5.10.269 |
 
 ---
 
@@ -100,5 +116,7 @@ If you find **Equinox Kernel** useful and would like to support its continued de
 - [**DroidSpaces**](https://github.com/ravindu644/Droidspaces-OSS) by **ravindu644** — container runtime and kernel requirements
 - [**Neutron Toolchains**](https://github.com/Neutron-Toolchains/clang-build-catalogue) — LLVM/Clang toolchain
 - [**AnyKernel3**](https://github.com/osm0sis/AnyKernel3) by **osm0sis** — flashable kernel packaging
+- [**BakaSU**](https://github.com/Baka-SU/BakaSU) (formerly ReSukiSU) — kernel root implementation of the BakaSU edition
+- **Nanairo** — BakaSU, SUSFS and BBR integration of the BakaSU edition
 
 Thanks to Qualcomm, LineageOS contributors, Android Common Kernel contributors, and the broader Linux kernel community for the upstream kernel, platform, and driver work that Equinox builds upon.
