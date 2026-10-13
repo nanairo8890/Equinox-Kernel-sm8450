@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="equinox-banner.png" alt="Equinox Kernel" width="100%">
+<img src="bakasu-edition-banner.webp" alt="Equinox Kernel - BakaSU and NoMount Edition by Nanairo8890" width="100%">
 
 # Equinox Kernel
 
