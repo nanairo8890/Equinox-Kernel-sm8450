@@ -1,3 +1,5 @@
+Idioma: Español
+
 # Equinox Kernel — edición BakaSU
 
 **Equinox Kernel** es el kernel de **[LF52406](https://github.com/LF52406)** para el

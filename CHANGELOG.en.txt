@@ -1,3 +1,5 @@
+Idioma: English
+
 # Equinox Kernel BakaSU and NoMount Edition: Changelog
 
 Edition by Nanairo8890, with permission from LF52406. Based on Equinox Kernel 5.10.269 for the POCO F5 Pro / Redmi K60 (`mondrian`).

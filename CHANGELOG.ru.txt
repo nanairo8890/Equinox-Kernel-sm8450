@@ -1,3 +1,5 @@
+Idioma: Русский
+
 # Equinox Kernel BakaSU and NoMount Edition: список изменений
 
 Версия от Nanairo8890, с разрешения LF52406. Основана на Equinox Kernel 5.10.269 для POCO F5 Pro / Redmi K60 (`mondrian`).
