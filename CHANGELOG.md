@@ -1,0 +1,223 @@
+# Equinox Kernel — edición BakaSU
+
+**Equinox Kernel** es el kernel de **[LF52406](https://github.com/LF52406)** para el
+POCO F5 Pro / Redmi K60 (`mondrian`). Esta edición la hizo **Nanairo** con permiso de
+LF52406. Toma Equinox 5.10.269 tal como se publicó y le cambia el root: pone BakaSU
+(antes ReSukiSU) en lugar de KernelSU-Next. Desde r2 incluye NoMount de maxsteeel.
+
+- Equinox oficial: https://github.com/LF52406/Equinox-Kernel-sm8450
+- Problemas con esta edición: repórtalos a Nanairo, no a LF52406.
+
+---
+
+## 5.10.269 r3 — 2026-10-13
+
+### Para MistOS 5.1 Beta (20261011)
+- MistOS 5.1 Beta 17.0 (build 20261011) trae su kernel stock en 5.10.269 (antes 5.10.256),
+  compilado con Clang r596125, así que sus módulos del vendor son nuevos. Los CRC de este
+  kernel coinciden con los 337 módulos de `vendor_boot` y los 390 de `vendor_dlkm` de esa
+  build, y siguen coincidiendo con los de MistOS 5.0 Alpha 20260914.
+- La config del kernel stock nuevo solo agrega `ARM64_ERRATUM_4118414`, `RCU_EXP_KTHREAD` y
+  `QCOM_CRASH_SYMBOL_MATCH` (desactivada), y Equinox ya las tenía igual.
+- Se instala igual que antes: el zip de AnyKernel3 solo reemplaza el `Image` y conserva el
+  ramdisk, la cabecera y el bootconfig de la ROM. Si actualizas MistOS, vuelve a flashear
+  el zip después, porque la ROM trae su propio kernel.
+
+### BakaSU actualizado (versión 35229)
+- BakaSU `e1682a28` (v4.2.0-rc3 + 58 commits, versión 35229). Es el commit del PR
+  [#624](https://github.com/Baka-SU/BakaSU/pull/624) "kernel: sync for latest susfs" del
+  autor de BakaSU, que vuelve a permitir compilar con SUSFS: el `main` de BakaSU lo
+  bloquea desde el 10 de octubre ([`48fa4bb7`](https://github.com/Baka-SU/BakaSU/commit/48fa4bb7))
+  porque el SUSFS de entonces provocaba detecciones en `selinux_hide`. El PR todavía no
+  está fusionado; si cambia antes de fusionarse, habrá una r4.
+- Trae lo nuevo de `main` hasta `64814408`:
+  - Arreglo de la detección por canal lateral de tiempo en `selinux_hide`
+    ([KernelSU #3877](https://github.com/tiann/KernelSU/pull/3877)) y de la detección por
+    sidtab ([KernelSU #3873](https://github.com/tiann/KernelSU/pull/3873)).
+  - `track_throne` diferido a task_work ([KernelSU #3871](https://github.com/tiann/KernelSU/pull/3871))
+    y el orden original de comprobación de permisos al cambiar el contexto SELinux.
+  - `su` no se redirige si no existe `ksud` ([#597](https://github.com/Baka-SU/BakaSU/pull/597)).
+  - El único commit de `main` que no está, `d7260ca1` (context_add_hash), no aplica a este
+    kernel: Linux 5.10 no tiene `context_add_hash`.
+- **Manager: BakaSU 35229** (`BakaSU_v4.2.0-rc3_35229-arm64-v8a-release.apk`, adjunto), del
+  CI oficial de BakaSU (`main` en `d7260ca1`), firmado con la misma clave que el 35217. La
+  interfaz con el kernel sigue en la versión 5, así que el manager 35217 también funciona,
+  pero conviene actualizarlo.
+
+### SUSFS actualizado (sigue en v2.3.0)
+- SUSFS en el último commit de `gki-android12-5.10`
+  ([`82f08351`](https://gitlab.com/simonpunk/susfs4ksu/-/commit/82f08351), 12 de octubre):
+  sincronizado con el KernelSU nuevo y con el arreglo de fugas de SELinux que imita el de
+  KernelSU. Solo cambian los hooks de `security/selinux/hooks.c`,
+  `security/selinux/selinuxfs.c` y `fs/exec.c`.
+- `fs/susfs.c`, sus cabeceras y los comandos de `ksu_susfs` son los mismos que en r2, así
+  que BRENE y el resto de módulos que usan SUSFS funcionan igual. Siguen activas todas las
+  funciones: sus_path, sus_mount, sus_kstat, sus_map, spoof uname, spoof
+  cmdline/bootconfig, open_redirect, log y ocultación de símbolos.
+
+### NoMount actualizado (v2.1.1)
+- **[NoMount](https://github.com/maxsteeel/nomount) v2.1.1 de maxsteeel** (`7046c7a`):
+  búsqueda de reglas y listado de directorios más rápidos, reglas guardadas en una sola
+  reserva por directorio, inodos virtuales independientes de las reglas, liberación con
+  `call_rcu()`, y arreglos de use-after-free en lookup/iterate_dir y de una lectura fuera
+  de rango en `NM_CMD_GET_UIDS`. El arreglo `7e7342c` de **deref3046** ya viene incluido.
+- Actualiza el metamódulo oficial a `NoMount-v2.1.1-release-7046c7a-555.zip` desde el
+  manager de BakaSU: https://github.com/maxsteeel/nomount/releases/tag/v2.1.1. Igual que
+  antes, detecta el driver integrado y no carga ningún `.ko`.
+- Se mantienen los tres cambios de esta edición: las apps a las que BakaSU/SUSFS desmontan
+  los módulos ven el sistema original, no hay `/sys/module/nomount/version` y el filtro de
+  `/proc/kallsyms` de SUSFS oculta los símbolos de NoMount.
+- El filtro de `/proc/kallsyms` ahora también oculta `dummy_key_instantiate` y
+  `dummy_key_free_preparse`, dos funciones de NoMount que en r2 seguían visibles.
+- Se compila con `-O3` como upstream, pero sin `-fno-stack-protector`: upstream lo usa para
+  sus `.ko` precompilados, e integrado en el kernel conserva el stack protector.
+
+### Problemas conocidos de NoMount (upstream, siguen abiertos)
+- [#75](https://github.com/maxsteeel/nomount/issues/75): un archivo `.replace` o un
+  directorio opaco dentro de un módulo puede hacer desaparecer el directorio entero y
+  provocar un bootloop. Antes de usar NoMount, revisa que ningún módulo los use:
+  `su -c "find /data/adb/modules -name .replace"`.
+- [#71](https://github.com/maxsteeel/nomount/issues/71): no uses NoMount para reemplazar
+  `.ko` del vendor.
+
+### Comprobaciones
+- KMI contra Equinox limpio: 0 CRC cambiados y 0 símbolos eliminados (solo se agrega
+  `put_pid_ns`, igual que en r1 y r2). NoMount no exporta ningún símbolo.
+- Módulos del vendor: los CRC coinciden con los 337 de `vendor_boot` y los 390 de
+  `vendor_dlkm` de MistOS 5.1 Beta 20261011, y con los de MistOS 5.0 Alpha 20260914.
+- **Probado en el teléfono** (POCO F5 Pro, MistOS 5.1 Beta 20261011): arranca, 0 módulos del
+  vendor rechazados (385 cargados), BakaSU, SUSFS y BRENE funcionan, SELinux en Enforcing y sin
+  errores en dmesg. Para comprobarlo tras instalar: `adb shell su -c "dmesg | grep -i 'disagrees about version'"` (debe salir vacío).
+
+### Instalador
+- Al instalar, AnyKernel3 muestra en ASCII una chica ratón y el logo de Equinox, con "BakaSU
+  and NoMount Edition by Nanairo8890", antes de los datos del kernel.
+
+Todo lo demás es igual que en r2: Equinox 5.10.269, DroidSpaces y BBR por defecto.
+
+---
+
+## 5.10.269 r2 — 2026-10-08
+
+### Novedad: NoMount integrado
+- **[NoMount](https://github.com/maxsteeel/nomount) v2.1.0 de maxsteeel**, integrado en el
+  kernel (`CONFIG_NOMOUNT=y`). NoMount es un metamódulo para KernelSU y APatch: en lugar de
+  montar los archivos de los módulos con OverlayFS o Magic Mount, los inyecta redirigiendo
+  rutas en la capa VFS, así que no aparece ningún montaje en `/proc/mounts`.
+  - Para usarlo, instala el metamódulo oficial `NoMount-v2.1.0-release-500.zip` desde el
+    manager de BakaSU: https://github.com/maxsteeel/nomount/releases/tag/v2.1.0. Al
+    instalarse dice "NoMount Internal API detected (Built-in)" y no carga ningún `.ko`
+    (los `.ko` precompilados no cargan en kernels con CRC distintos, como este).
+  - KernelSU admite un solo metamódulo a la vez. Si usas Hybrid Mount u otro, desinstálalo
+    antes de instalar NoMount.
+  - Sin el metamódulo, NoMount no hace nada: solo registra su tipo de clave al arrancar.
+    Solo root (`CAP_SYS_ADMIN`) puede darle órdenes.
+  - Incluye el arreglo publicado después de v2.1.0
+    [`7e7342c`](https://github.com/maxsteeel/nomount/commit/7e7342cd48841cfedd00be2fd20a0311f69c48c5)
+    de **deref3046**: no llama a `->evict_inode()` del sistema de archivos real con los
+    inodos virtuales de NoMount.
+- Cambios de esta edición sobre NoMount, para ocultar mejor el root:
+  - Los procesos a los que BakaSU y SUSFS les desmontan los módulos (apps con "Desmontar
+    módulos" y procesos aislados) ven el sistema original, igual que con Magic Mount u
+    OverlayFS. La lista de exclusión de la WebUI de NoMount sigue funcionando además.
+  - Al estar integrado no publica `/sys/module/nomount/version`; `nm version` sigue
+    funcionando.
+  - El filtro de `/proc/kallsyms` de SUSFS también oculta los símbolos de NoMount (`nm_*`,
+    `nomount*`) y `__initstub__kmod_kernelsu`, que antes se veía.
+
+### Problemas conocidos de NoMount (upstream)
+- [#75](https://github.com/maxsteeel/nomount/issues/75): un archivo `.replace` o un
+  directorio opaco dentro de un módulo puede hacer desaparecer el directorio entero y
+  provocar un bootloop. Antes de pasarte a NoMount, revisa que ningún módulo los use:
+  `su -c "find /data/adb/modules -name .replace"`.
+- [#71](https://github.com/maxsteeel/nomount/issues/71): no uses NoMount para reemplazar
+  `.ko` del vendor.
+
+### Comprobaciones
+- KMI contra Equinox limpio: 0 CRC cambiados y 0 símbolos eliminados. NoMount no exporta
+  ningún símbolo.
+- Módulos del vendor de MistOS 5.0 Alpha (20260914): los CRC coinciden con los 337 de
+  `vendor_boot` y los 390 de `vendor_dlkm`.
+- Probado en un POCO F5 Pro con MistOS 5.0 Alpha 20260914 y el manager de BakaSU 35217,
+  arrancando este mismo `Image` con `fastboot boot`: 0 módulos del vendor rechazados (385
+  cargados), root, módulos zygisk, SUSFS y BRENE funcionan, SELinux en Enforcing y sin
+  errores del kernel.
+- NoMount probado con reglas sobre `/system` (erofs): inyectar un archivo nuevo, reemplazar
+  uno existente, ocultarlo, aislar un UID y limpiar todas las reglas, sin avisos del kernel.
+
+Todo lo demás es igual que en r1: BakaSU `c9246641` (35217), SUSFS v2.3.0 y BBR por defecto.
+
+---
+
+## 5.10.269 r1 — 2026-10-07
+
+### Cambios respecto de Equinox 5.10.269 oficial
+- **Root: BakaSU** en lugar de KernelSU-Next 3.4.0. BakaSU es el nombre nuevo de
+  ReSukiSU desde el 5 de octubre de 2026; se usa `main` en el commit `c9246641`
+  (v4.2.0-rc3 + 46 commits, versión 35217).
+  - **Requiere el manager de BakaSU 35217 o más nuevo.** Desde el 4 de octubre BakaSU
+    usa la versión 5 de la interfaz entre kernel y `ksud`, y `ksud` no inicia los módulos
+    ni `su` si no coincide. El manager de ReSukiSU v4.2.0-rc3 (35193) reconoce el kernel
+    porque la firma es la misma, pero usa la versión 4: muestra "Manager update required"
+    y hay que actualizarlo desde el mismo manager antes de reiniciar.
+  - Si vuelves a un kernel con ReSukiSU anterior (interfaz 4), el manager nuevo deja de
+    funcionar con él hasta que instales uno de esa versión.
+- **SUSFS v2.3.0** de la rama `gki-android12-5.10` de simonpunk, en su último commit
+  (`9892175`, 26 de septiembre). Usa el soporte de SUSFS propio de BakaSU, sin el parche
+  adaptado para KernelSU-Next. Trae los arreglos de SUS_KSTAT del 23 al 26 de septiembre,
+  entre ellos `f_flags` en `statfs` y el tipo de `is_statically`.
+  - Funciones activas: sus_path, sus_mount, sus_kstat, sus_map, spoof uname, spoof
+    cmdline/bootconfig, open_redirect, log y ocultación de símbolos de KSU/SUSFS.
+- **BBR** es el control de congestión TCP por defecto (Equinox trae BBR, pero arranca con
+  CUBIC). CUBIC sigue disponible y se puede cambiar en caliente.
+
+### Igual que Equinox
+- Linux **5.10.269** con la config de mondrian de Equinox.
+- **DroidSpaces** con el perfil KMI-safe de Equinox: SYSVIPC y POSIX_MQUEUE reubicados en
+  las reservas KABI de Android para no romper los módulos del vendor.
+- Arreglos del touch Goodix, Clang CFI y MODVERSIONS.
+- Instalación con AnyKernel3: solo reemplaza el `Image` del slot activo y conserva el
+  ramdisk, la cabecera y el bootconfig de la ROM.
+
+### Detalles técnicos
+- Compilado con Clang de AOSP (`clang-r584948`) y ThinLTO. Equinox oficial usa Neutron
+  Clang 24 y LTO completo. Los CRC de los símbolos salen de los tipos, no del compilador
+  ni del LTO.
+- Comprobaciones obligatorias antes de empaquetar:
+  1. **KMI contra Equinox limpio**, el mismo control que hace Equinox: se compila
+     Equinox 5.10.269 sin root con la misma config y ningún símbolo exportado puede
+     cambiar de CRC ni desaparecer.
+  2. **Módulos del vendor de MistOS 5.0 Alpha (20260914)**: los CRC coinciden con
+     los 337 módulos de `vendor_boot` y los 390 de `vendor_dlkm`.
+- `/proc/version` muestra `Nanairo@Equinox`. `set_uname` de SUSFS solo cambia lo que
+  devuelve `uname`.
+- SUSFS arranca con el log a dmesg activado. BRENE lo apaga al arrancar; sin BRENE, usa
+  `ksu_susfs enable_log 0`.
+
+### Compatibilidad
+- Las mismas ROMs AOSP de mondrian que Equinox oficial (Android 16-17), porque el KMI no
+  cambia respecto de Equinox.
+- Probado en un POCO F5 Pro con MistOS 5.0 Alpha 20260914 y el manager de BakaSU 35217,
+  instalado con este mismo zip: arranca, 0 módulos del vendor rechazados (386 cargados),
+  root, módulos zygisk, SUSFS y BRENE funcionan, SELinux en Enforcing y sin errores del
+  kernel.
+
+---
+
+## Créditos
+- **[LF52406](https://github.com/LF52406)**: Equinox Kernel, la base de esta edición
+  (Linux 5.10.269, config de mondrian, DroidSpaces, arreglos del touch y la comprobación
+  de KMI). Si quieres apoyarlo: [PayPal](https://www.paypal.me/LF52406) ·
+  [Patreon](https://patreon.com/InfernalGT) · [Boosty](https://boosty.to/infernalgt/donate)
+- [LineageOS](https://github.com/LineageOS/android_kernel_xiaomi_sm8450): kernel base de
+  mondrian, y [android_kernel_qcom_sm8450](https://github.com/LineageOS/android_kernel_qcom_sm8450).
+- [Android Common Kernel](https://android.googlesource.com/kernel/common) y
+  [Linux](https://www.kernel.org/).
+- [BakaSU](https://github.com/Baka-SU/BakaSU) (antes ReSukiSU) y, detrás,
+  [KernelSU](https://github.com/tiann/KernelSU) de tiann: root en el kernel.
+- [SUSFS](https://gitlab.com/simonpunk/susfs4ksu) de **simonpunk**.
+- [DroidSpaces](https://github.com/ravindu644/Droidspaces-OSS) de **ravindu644**.
+- [NoMount](https://github.com/maxsteeel/nomount) de **maxsteeel**: redirección de rutas en
+  VFS para el metamódulo NoMount (v2.1.1), que incluye el arreglo `7e7342c` de **deref3046**.
+- [AnyKernel3](https://github.com/osm0sis/AnyKernel3) de **osm0sis**.
+- **[Nanairo8890](https://github.com/nanairo8890)**: integración de BakaSU, SUSFS, BBR y NoMount en Equinox.
