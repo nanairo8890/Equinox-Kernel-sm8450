@@ -723,6 +723,7 @@ static int s_show(struct seq_file *m, void *p)
 			susfs_starts_with(iter->name, "nm_") ||
 			susfs_starts_with(iter->name, "__initcall__kmod_nomount") ||
 			susfs_starts_with(iter->name, "__initstub__kmod_nomount") ||
+			susfs_starts_with(iter->name, "dummy_key_") ||
 			susfs_starts_with(iter->name, "apply_kernelsu") ||
 			susfs_starts_with(iter->name, "handle_sepolicy") ||
 			susfs_starts_with(iter->name, "getenforce") ||
