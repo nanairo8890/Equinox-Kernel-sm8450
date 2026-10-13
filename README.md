@@ -52,7 +52,7 @@
 
 | Group | Included |
 |:--|:--|
-| **Root & hiding** | KernelSU-Next integration · SUSFS |
+| **Root & hiding** | BakaSU integration · SUSFS |
 | **Containers** | DroidSpaces · PID namespaces · IPC / SYSVIPC |
 | **Networking** | TCP BBR · runtime congestion-control switching |
 | **Device** | mondrian production config · Goodix touch stability fixes |
@@ -122,6 +122,6 @@ If you find **Equinox Kernel** useful and would like to support its continued de
 - [**AnyKernel3**](https://github.com/osm0sis/AnyKernel3) by **osm0sis** — flashable kernel packaging
 - [**BakaSU**](https://github.com/Baka-SU/BakaSU) (formerly ReSukiSU) — kernel root implementation of the BakaSU edition
 - [**NoMount**](https://github.com/maxsteeel/nomount) by **maxsteeel**, with a fix by **deref3046** — VFS path redirection for the NoMount metamodule in the BakaSU edition
-- **Nanairo** — BakaSU, SUSFS, BBR and NoMount integration of the BakaSU edition
+- **Nanairo8890** — BakaSU, SUSFS, BBR and NoMount integration of the BakaSU edition
 
 Thanks to Qualcomm, LineageOS contributors, Android Common Kernel contributors, and the broader Linux kernel community for the upstream kernel, platform, and driver work that Equinox builds upon.
