@@ -64,7 +64,7 @@
 
 ### Linux 5.10.269
 
-- Updated KernelSU-Next to `3.4.0`
+- Updated BakaSU to `v4.2.0-rc3` (35229)
 - Integrated SUSFS `2.3.0`
 - Added DroidSpaces support
 - Added and verified TCP BBR support
