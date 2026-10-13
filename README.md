@@ -16,18 +16,18 @@
 > **This fork is the BakaSU edition of Equinox**, made by **Nanairo** with LF52406's permission.
 > It is Equinox 5.10.269 as released, with four changes:
 >
-> - **[BakaSU](https://github.com/Baka-SU/BakaSU)** (formerly ReSukiSU) instead of KernelSU-Next, as the `KernelSU/` submodule. Use the BakaSU manager 35217 or newer: this kernel uses UAPI 5, and older ReSukiSU managers (UAPI 4) ask to be updated before modules and `su` start.
+> - **[BakaSU](https://github.com/Baka-SU/BakaSU)** (formerly ReSukiSU) instead of KernelSU-Next, as the `KernelSU/` submodule at `e1682a28`, from BakaSU's [PR #624](https://github.com/Baka-SU/BakaSU/pull/624), which brings SUSFS builds back. Use the BakaSU manager 35217 or newer (35229 recommended): this kernel uses UAPI 5, and older ReSukiSU managers (UAPI 4) ask to be updated before modules and `su` start.
 > - **SUSFS v2.3.0** from [simonpunk's](https://gitlab.com/simonpunk/susfs4ksu) `gki-android12-5.10` branch, through BakaSU's built-in SUSFS support.
 > - **BBR** as the default TCP congestion control.
-> - **[NoMount](https://github.com/maxsteeel/nomount) v2.1.0** by maxsteeel built in (`fs/nomount`), with
->   deref3046's fix `7e7342c`. Use it with the official NoMount metamodule. Processes that BakaSU/SUSFS
+> - **[NoMount](https://github.com/maxsteeel/nomount) v2.1.1** by maxsteeel built in (`fs/nomount`), which
+>   includes deref3046's fix `7e7342c`. Use it with the official NoMount metamodule. Processes that BakaSU/SUSFS
 >   umount modules for see the stock filesystem, and NoMount is hidden from `/sys/module` and `/proc/kallsyms`.
 >
 > Everything else, DroidSpaces included, is LF52406's work, described below. The official Equinox
 > builds are at [LF52406/Equinox-Kernel-sm8450](https://github.com/LF52406/Equinox-Kernel-sm8450).
 > Report problems with the BakaSU edition here, not to LF52406.
 >
-> Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-bakasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-bakasu-r2.md)
+> Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-bakasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-bakasu-r3.md)
 
 ---
 
@@ -37,9 +37,9 @@
 |:--|:--|
 | **Linux** | `5.10.269-Equinox` |
 | **Compatibility** | Android 16–17 · AOSP-based ROMs |
-| **BakaSU** | `v4.2.0-rc3-c9246641` (35217) |
+| **BakaSU** | `v4.2.0-rc3-58-ge1682a28` (35229) |
 | **SUSFS** | `2.3.0` |
-| **NoMount** | `v2.1.0` built in (+ `7e7342c`) |
+| **NoMount** | `v2.1.1` built in |
 | **DroidSpaces** | Supported |
 | **TCP** | BBR default · CUBIC available |
 | **Toolchain** | AOSP Clang `22.0.0` (r584948) |
