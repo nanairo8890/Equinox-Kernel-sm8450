@@ -2,7 +2,7 @@
 
 <img src="bakasu-edition-banner.webp" alt="Equinox Kernel - BakaSU and NoMount Edition by Nanairo8890" width="100%">
 
-# Equinox Kernel
+# Equinox Kernel BakaSU and NoMount Edition by Nanairo8890
 
 **POCO F5 Pro / Redmi K60** · `mondrian` · Snapdragon 8+ Gen 1
 
